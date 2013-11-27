@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Wnmp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An easy Nginx, MySQL and PHP environment for Windows.">
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href="http://wnmp.x64architecture.com/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://wnmp.x64architecture.com/assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="http://wnmp.x64architecture.com/assets/css/font-awesome.min.css" rel="stylesheet">
+    <link href="http://wnmp.x64architecture.com/assets/css/bootswatch.css" rel="stylesheet">
+	
+  </head>
+
+  <body class="preview" id="top" data-spy="scroll" data-target=".subnav" data-offset="80">
+
+
+  <!-- Navbar
+    ================================================== -->
+ <div class="navbar navbar-fixed-top">
+   <div class="navbar-inner">
+     <div class="container">
+       <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+         <span class="icon-bar"></span>
+       </a>
+       <a class="brand" href="../index.html">Wnmp</a>
+       <div class="nav-collapse collapse" id="main-menu">
+        <ul class="nav" id="main-menu-left">
+		<li><a id="releasenotes-link" href="2028.html">Release Notes</a></li>
+          <li class="dropdown" id="preview-menu">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Download <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a target="_blank" href="https://sourceforge.net/projects/wnmp-env/files/wnmp/2.0.2.8/Wnmp%202.0.2.8.exe/download">Wnmp 2.0.2.8</a></li>
+            </ul>
+          </li>
+        </ul>
+       </div>
+     </div>
+   </div>
+ </div>
+
+    <div class="container">
+
+
+<!-- Masthead
+================================================== -->
+<header class="jumbotron subhead" id="overview">
+  <div class="row">
+    <div class="span6">
+      <h1>Wnmp</h1>
+      <p class="lead">An easy Nginx, MySQL and PHP environment for Windows.</p>
+    </div>
+  </div>
+  <div class="subnav">
+    <ul class="nav nav-pills">
+	  <li><a href="../index.html">Home</a></li>
+	  <li><a href="#changelog">Changelog</a></li>
+      <li><a href="#versions">Versions</a></li>
+      <li><a href="#install">How to Install</a></li>
+      <li><a href="#notes">Notes</a></li>
+      <li><a href="#sysrequirements">System Requirements</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+</header>
+
+
+
+
+<!-- Changelog
+================================================== -->
+<section id="changelog">
+  <div class="page-header">
+    <h1>Changelog:</h1>
+  </div>
+<pre>
+Wnmp 2.0.2.8
+************
+
+- Wnmp
+
+  * Fixed some things: Changed installer files due to modified configuration files.
+</pre>
+
+</section>
+
+<!-- Versions
+================================================== -->
+<section id="versions">
+  <div class="page-header">
+    <h1>Versions of the software:</h1>
+  </div>
+  
+	<div class="row">
+	
+    <div class="span4">
+      <ul>
+		<li>Nginx 1.5.4</li>
+	  </ul>
+	  <ul>
+		<li>MariaDB 5.5.32</li>
+	  </ul>
+	  <ul>
+		<li>PHP 5.4.19 (Non Thread Safe + FastCGI)</li>
+	  </ul>
+	  <ul>
+		<li>phpMyAdmin 4.0.6</li>
+	  </ul>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- Install
+================================================== -->
+<section id="install">
+  <div class="page-header">
+    <h1>How to Install</h1>
+  </div>
+<ol>
+<li>Download the latest version of Wnmp <a href="https://sourceforge.net/projects/wnmp-env/files/wnmp/2.0.2.8/Wnmp%202.0.2.8.exe/download" rel="nofollow">here</a> (latest version 2.0.2.8)</li>
+<li>Then open <strong>Wnmp.exe</strong> and install it anywhere.</li>
+<li>And then run <strong>Wnmp.exe</strong>(which is located in the Wnmp folder)</li>
+<li>And thats it, enjoy Wnmp!</li>
+</ol>
+
+</section>
+
+
+
+<!-- Notes
+================================================== -->
+<section id="notes">
+  <div class="page-header">
+    <h1>Notes</h1>
+  </div>
+  
+<div>The Username and Password for MySQL is: user: <strong>root</strong> password: <strong>password</strong> (I recommend changing the password)</div>
+<div>You should change $cfg['blowfish_secret'] in config.inc.php in the phpmyadmin folder for added security.</div>
+<div>The SSl Certificate is Self Signed by me. For added security create your own.</div>
+<a class="btn" href="https://sourceforge.net/projects/wnmp-env/files/wnmp/2.0.2.7/Wnmp%202.0.2.7.exe/download">Download Now</a> &nbsp; <a href="http://www.softpedia.com/get/Internet/Servers/Server-Tools/Kurt-Wnmp.shtml" rel="nofollow"><img alt="" src="https://s0.wp.com/imgpress?url=http%3A%2F%2Fs1.softpedia-static.com/base_img/softpedia_free_award_f.gif" /></a>
+<div>If you can, please donate to <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=P7LAQRRNF6AVE" rel="nofollow">kurt@x64architecture.com</a> using paypal for my effort. All donations are appreciated no matter if big or small.</div>
+</section>
+
+<!-- System Requirements
+================================================== -->
+<section id="sysrequirements">
+  <div class="page-header">
+    <h1>System Requirements</h1>
+  </div>
+  
+  <table class="table table-bordered table-striped table-hover">
+    <thead>
+      <tr>
+        <td>Nginx</td>
+        <td>8 – 12 MB of ram</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PHP FastCGI</td>
+        <td>15 – 20 MB of ram</td>
+      </tr>
+      <tr>
+        <td>MariaDB</td>
+        <td>512 MB of ram</td>
+      </tr>
+      <tr>
+        <td>Disk Space</td>
+        <td>378 MB</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+
+<!-- FAQ
+================================================== -->
+<section id="faq">
+  <div class="page-header">
+    <h1>FAQ</h1>
+  </div>
+
+  <div class="row">
+    <div class="span4">
+<strong>Why Does MySQL Server take up so much ram?</strong>
+<div>It takes up so much ram vs all of the other programs because MySQL works very well with that configuration. And you can buy 1GB of ram for very cheap.</div>
+<strong>Why use Wnmp over WAMP?</strong>
+<div>You should use Wnmp over WAMP because Apache is very inefficient. Read more <a href="http://www.wikivs.com/wiki/Apache_vs_nginx" rel="nofollow">here</a>. Also there is another reason you should use Wnmp, Wnmp values security, stability and user friendliness. And Wnmp always keeps up to date with the latest Nginx, MariaDB, PHP and phpMyAdmin releases.</div>
+<strong>When will I update this program?</strong>
+<div>When all of the components get updated to a stable release.</div>
+  </div>
+</section>
+
+<br><br><br><br>
+
+     <!-- Footer
+      ================================================== -->
+      <hr>
+
+      <footer id="footer">
+        <p class="pull-right"><a href="#top">Back to top</a></p>
+        <div class="links">
+          <a href="https://bitbucket.org/x64architecture/windows-nginx-mysql-php">Bitbucket</a>
+		  <a href="https://sourceforge.net/projects/wnmp-env">SourceForge</a>
+          <a href="https://github.com/x64Architecture/windows-nginx-mysql-php">GitHub</a>
+          <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=P7LAQRRNF6AVE">Donate</a>
+        </div>
+		Bootstrap theme based on Spacelab by <a href="http://thomaspark.me/">Thomas Park</a>.<br/>
+        Hosted on <a href="http://pages.github.com/">GitHub</a>. Icons from <a href="http://fortawesome.github.com/Font-Awesome/">Font Awesome</a>. Web fonts from <a href="http://www.google.com/webfonts">Google</a>.</p>
+      </footer>
+
+    </div><!-- /container -->
+
+
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--[if lt IE 9]>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<![endif]-->
+<!--[if gte IE 9]><!-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<!--<![endif]-->
+    <script src="http://wnmp.x64architecture.com/assets/js/jquery.smooth-scroll.min.js"></script>
+    <script src="http://wnmp.x64architecture.com/assets/js/bootstrap.min.js"></script>
+    <script src="http://wnmp.x64architecture.com/assets/js/bootswatch.js"></script>
+
+
+  </body>
+</html>
