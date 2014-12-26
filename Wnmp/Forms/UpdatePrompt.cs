@@ -17,6 +17,7 @@ This file is part of Wnmp.
     along with Wnmp.  If not, see <http://www.gnu.org/licenses/>.
 */
 using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 using Wnmp.Internals;
@@ -25,17 +26,16 @@ namespace Wnmp.Forms
     /// <summary>
     /// Form for viewing the changelog and asking if the user would like to update
     /// </summary>
-    public partial class ChangelogViewer : Form
+    public partial class UpdatePrompt : Form
     {
-        public ChangelogViewer()
+        public UpdatePrompt()
         {
             InitializeComponent();
         }
 
         protected override CreateParams CreateParams
         {
-            get
-            {
+            get {
                 var myCp = base.CreateParams;
                 myCp.Style = myCp.Style & ~Common.WS_THICKFRAME; // Remove WS_THICKFRAME (Disables resizing)
                 return myCp;
@@ -56,7 +56,7 @@ namespace Wnmp.Forms
 
         private void viewchange_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://getwnmp.org/WhatsNew");
+            Process.Start("https://www.getwnmp.org/WhatsNew");
         }
     }
 }

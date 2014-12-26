@@ -19,7 +19,6 @@ This file is part of Wnmp.
 using System;
 using System.Configuration;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -36,10 +35,9 @@ namespace Wnmp.Programs
         public static Process ps; // Avoid GC
         public static ContextMenuStrip cms = new ContextMenuStrip(); // Config button context menu
         public static ContextMenuStrip lms = new ContextMenuStrip(); // Log button context menu
-        public static ToolTip PHP_start_Tip = new ToolTip(); // Start button ToolTip
-        public static ToolTip PHP_stop_Tip = new ToolTip(); // Stop button ToolTip
-        private static string pini = Main.StartupPath + "/php/php.ini"; // Location of php.ini to pass on to php
-        private static string PHPExe = Main.StartupPath + "/php/php-cgi.exe";
+        private static readonly ToolTip toolTip = new ToolTip(); // ToolTip
+        private static readonly string pini = String.Format("\"{0}/php/php.ini\"", Main.StartupPath); // Location of php.ini to pass on to php
+        private static readonly string PHPExe = Main.StartupPath + "/php/php-cgi.exe";
 
         private enum Status
         {
@@ -54,7 +52,6 @@ namespace Wnmp.Programs
         /// </summary>
         public static void startprocess(string p, string args)
         {
-            Thread.Sleep(100); // Wait
             ps = new Process(); // Create process
             ps.StartInfo.FileName = p; // p is the path and file name of the file to run
             ps.StartInfo.Arguments = args; // Parameters to pass to program
@@ -64,8 +61,7 @@ namespace Wnmp.Programs
             ps.StartInfo.CreateNoWindow = true; // Excute with no window
             ps.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             ps.StartInfo.EnvironmentVariables.Add("PHP_FCGI_MAX_REQUESTS", "2000"); // After 2000 requests php-cgi.exe will kill its process
-            if (PHPStatus != Status.Stopped)
-            {
+            if (PHPStatus != Status.Stopped) {
                 ps.EnableRaisingEvents = true;
                 ps.Exited += ps_Exited; // Were going to have to restart PHP after its process is killed.
             }
@@ -77,63 +73,66 @@ namespace Wnmp.Programs
             /* The Win-PHP developers thought is was smart to kill php after a certain amount of requests (Probably 500). 
                so we have to restart it once it exits or set 'PHP_FCGI_MAX_REQUESTS' variable to 0. I've looked and people are recommending just to restart it. */
             if (PHPStatus != Status.Stopped)
-            {
                 startprocess(PHPExe, String.Format("-b localhost:{0} -c {1}", Options.settings.PHPPort, pini));
-            }
         }
 
-        internal static void php_start_Click(object sender, EventArgs e)
+        public static void php_start_Click(object sender, EventArgs e)
         {
-            startprocess(PHPExe, String.Format("-b localhost:{0} -c {1}", Options.settings.PHPPort, pini));
+            int i;
+            int pp = Options.settings.PHPProcesses;
+            int port = Options.settings.PHPPort;
+
+            for (i = 1; i <= pp; i++) {
+                startprocess(PHPExe, String.Format("-b localhost:{0} -c {1}", port, pini));
+                Log.wnmp_log_notice("Starting PHP " + i + "/" + pp + " On port: " + port, Log.LogSection.WNMP_PHP);
+                port++;
+            }
+            Log.wnmp_log_notice("PHP started", Log.LogSection.WNMP_PHP);
+
             PHPStatus = Status.Started;
-            Log.wnmp_log_notice("Attempting to start PHP", Log.LogSection.WNMP_PHP);
             Common.ToStartedLabel(Program.formInstance.phprunning);
         }
 
-        internal static void php_stop_Click(object sender, EventArgs e)
+        public static void php_stop_Click(object sender, EventArgs e)
         {
-            Log.wnmp_log_notice("Attempting to stop PHP", Log.LogSection.WNMP_PHP);
+            Log.wnmp_log_notice("Stopping PHP", Log.LogSection.WNMP_PHP);
             PHPStatus = Status.Stopped;
             var phps = Process.GetProcessesByName("php-cgi");
             foreach (var currentProc in phps)
-            {
                 currentProc.Kill();
-            }
+
             Common.ToStoppedLabel(Program.formInstance.phprunning);
         }
 
-        internal static void php_restart_Click(object sender, EventArgs e)
+        public static void php_restart_Click(object sender, EventArgs e)
         {
             Log.wnmp_log_notice("Attempting to restart PHP", Log.LogSection.WNMP_PHP);
             // Kill PHP
             PHPStatus = Status.Stopped;
             var phps = Process.GetProcessesByName("php-cgi");
             foreach (var currentProc in phps)
-            {
                 currentProc.Kill();
-            }
 
             // Start PHP
-            startprocess(PHPExe, String.Format("-b localhost:{0} -c {1}", Options.settings.PHPPort, pini));
-            Common.ToStartedLabel(Program.formInstance.phprunning);
+            php_start_Click(null, null);
         }
 
-        internal static void php_start_MouseHover(object sender, EventArgs e)
+        public static void php_start_MouseHover(object sender, EventArgs e)
         {
-            PHP_start_Tip.Show("Start PHP-CGI", Program.formInstance.php_start);
+            toolTip.Show("Start PHP-CGI", Program.formInstance.php_start);
         }
 
-        internal static void php_stop_MouseHover(object sender, EventArgs e)
+        public static void php_stop_MouseHover(object sender, EventArgs e)
         {
-            PHP_stop_Tip.Show("Stop PHP-CGI", Program.formInstance.php_stop);
+            toolTip.Show("Stop PHP-CGI", Program.formInstance.php_stop);
         }
 
-        internal static void php_restart_MouseHover(object sender, EventArgs e)
+        public static void php_restart_MouseHover(object sender, EventArgs e)
         {
-            PHP_stop_Tip.Show("Restart PHP-CGI", Program.formInstance.php_restart);
+            toolTip.Show("Restart PHP-CGI", Program.formInstance.php_restart);
         }
 
-        internal static void php_cfg_Click(object sender, EventArgs e)
+        public static void php_cfg_Click(object sender, EventArgs e)
         {
             var btnSender = (Button)sender;
             var ptLowerLeft = new Point(0, btnSender.Height);
@@ -148,7 +147,7 @@ namespace Wnmp.Programs
             Process.Start(Options.settings.Editor, Main.StartupPath + "/php/" + e.ClickedItem.Text);
         }
 
-        internal static void php_log_Click(object sender, EventArgs e)
+        public static void php_log_Click(object sender, EventArgs e)
         {
             var btnSender = (Button)sender;
             var ptLowerLeft = new Point(0, btnSender.Height);

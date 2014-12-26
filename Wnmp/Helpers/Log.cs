@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
+using Wnmp.Forms;
 namespace Wnmp.Helpers
 {
     /// <summary>
@@ -37,9 +38,7 @@ namespace Wnmp.Helpers
         {
             var customAttributes = value.GetType().GetField(value.ToString()).GetCustomAttributes(typeof(DescriptionAttribute), true);
             if (customAttributes.Length > 0)
-            {
                 return ((DescriptionAttribute)customAttributes[0]).Description;
-            }
 
             return string.Empty;
         }
@@ -49,8 +48,7 @@ namespace Wnmp.Helpers
             var str = string.Format("{0} [{1}] - {2}", DateTime.Now.ToString(), GetEnumDescription(logSection), message);
             var textLength = rtfLog.TextLength;
             rtfLog.AppendText(str + "\n");
-            if (rtfLog.Find(GetEnumDescription(logSection), textLength, RichTextBoxFinds.MatchCase) != -1)
-            {
+            if (rtfLog.Find(GetEnumDescription(logSection), textLength, RichTextBoxFinds.MatchCase) != -1) {
                 rtfLog.SelectionLength = GetEnumDescription(logSection).Length;
                 rtfLog.SelectionColor = color;
             }
@@ -76,6 +74,10 @@ namespace Wnmp.Helpers
         {
             rtfLog = logRichTextBox;
             wnmp_log_notice("Initializing Control Panel", LogSection.WNMP_MAIN);
+            Log.wnmp_log_notice("Control Panel Version: " + Main.GetCPVER, Log.LogSection.WNMP_MAIN);
+            Log.wnmp_log_notice("Wnmp Version: " + Application.ProductVersion, Log.LogSection.WNMP_MAIN);
+            Log.wnmp_log_notice(OSVersionInfo.WindowsVersionString(), Log.LogSection.WNMP_MAIN);
+            Log.wnmp_log_notice("Wnmp Directory: " + Application.StartupPath, Log.LogSection.WNMP_MAIN);
         }
 
         public enum LogSection

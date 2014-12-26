@@ -34,8 +34,6 @@ namespace Wnmp.Helpers
     {
         private static Uri Wnmp_Upgrade_URL; // Wnmp upgrade installer url
         private static Version NEW_WNMP_VERSION; // Wnmp version in the XML
-        private static Version NEW_CP_VERSION; // Control panel version in the XML
-        private static Uri CP_UPDATE_URL; // Control panel url (link to CP exe)
         private static readonly Version WNMP_VER = new Version(Application.ProductVersion); // Current program version
         private static readonly string UpdateExe = Main.StartupPath + "/Wnmp-Upgrade-Installer.exe";
         private static readonly string WNMP_NEW = Main.StartupPath + "/Wnmp_new.exe";
@@ -54,44 +52,31 @@ namespace Wnmp.Helpers
             var elementName = "";
 
             int returnvalue;
-            if (!NativeMethods.InternetGetConnectedState(out returnvalue, 0))
-            {
+            if (!NativeMethods.InternetGetConnectedState(out returnvalue, 0)) {
                 MessageBox.Show("No active network connection detected", "Can't Check For Updates");
                 return false;
             }
 
-                var reader = new XmlTextReader(xmlUrl);
-                reader.MoveToContent();
+            var reader = new XmlTextReader(xmlUrl);
+            reader.MoveToContent();
 
-                if ((reader.NodeType == XmlNodeType.Element) && (reader.Name == "appinfo"))
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.NodeType == XmlNodeType.Element)
-                        {
-                            elementName = reader.Name;
-                        }
-                        else
-                        {
-                            if ((reader.NodeType == XmlNodeType.Text) && (reader.HasValue))
-                                switch (elementName)
-                                {
-                                    case "version":
-                                        NEW_WNMP_VERSION = new Version(reader.Value);
-                                        break;
-                                    case "upgradeurl":
-                                        Wnmp_Upgrade_URL = new Uri(reader.Value);
-                                        break;
-                                    case "cpversion":
-                                        NEW_CP_VERSION = new Version(reader.Value);
-                                        break;
-                                    case "cpupdateurl":
-                                        CP_UPDATE_URL = new Uri(reader.Value);
-                                        break;
-                                }
-                        }
+            if ((reader.NodeType == XmlNodeType.Element) && (reader.Name == "appinfo")) {
+                do {
+                    if (reader.NodeType == XmlNodeType.Element)
+                        elementName = reader.Name;
+                    else {
+                        if ((reader.NodeType == XmlNodeType.Text) && (reader.HasValue))
+                            switch (elementName) {
+                                case "version":
+                                    NEW_WNMP_VERSION = new Version(reader.Value);
+                                    break;
+                                case "upgradeurl":
+                                    Wnmp_Upgrade_URL = new Uri(reader.Value);
+                                    break;
+                            }
                     }
-                }
+                } while (reader.Read());
+            }
             return true;
         }
         #endregion
@@ -109,22 +94,18 @@ namespace Wnmp.Helpers
 
             webClient = new WebClient();
 
-            frm.FormClosed += (s, e) =>
-            {
+            frm.FormClosed += (s, e) => {
                 Program.formInstance.Enabled = true;
                 webClient.CancelAsync();
             };
 
-            webClient.DownloadProgressChanged += (s, e) =>
-            {
+            webClient.DownloadProgressChanged += (s, e) => {
                 frm.progressBar1.Value = e.ProgressPercentage;
                 frm.label2.Text = e.ProgressPercentage.ToString() + "%";
             };
 
-            webClient.DownloadFileCompleted += (s, e) =>
-            {
-                if (!e.Cancelled)
-                {
+            webClient.DownloadFileCompleted += (s, e) => {
+                if (!e.Cancelled) {
                     webClient.Dispose();
                     frm.Close();
                     Process.Start(UpdateExe);
@@ -132,58 +113,8 @@ namespace Wnmp.Helpers
                     DoBackUp();
                     Application.Exit();
                     Process.GetCurrentProcess().Kill();
-                }
-                else
-                {
+                } else
                     webClient.Dispose();
-                }
-            };
-
-            webClient.DownloadFileAsync(uri, path);
-
-            webClient.Dispose();
-        }
-
-        /// <summary>
-        /// Downloads the update for the control panel
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="path"></param>
-        private static void DownloadCPUpdate(Uri uri, string path)
-        {
-            webClient = new WebClient();
-            var frm = new UpdateProgress();
-            frm.StartPosition = FormStartPosition.CenterScreen;
-            frm.Show();
-            Program.formInstance.Enabled = false;
-
-            frm.FormClosed += (s, e) =>
-            {
-                Program.formInstance.Enabled = true;
-                webClient.CancelAsync();
-            };
-
-            webClient.DownloadProgressChanged += (s, e) =>
-            {
-                frm.progressBar1.Value = e.ProgressPercentage;
-                frm.label2.Text = e.ProgressPercentage.ToString() + "%";
-            };
-
-            webClient.DownloadFileCompleted += (s, e) =>
-            {
-                if (!e.Cancelled)
-                {
-                    webClient.Dispose();
-                    frm.Close();
-                    File.WriteAllBytes(UPDATER, Properties.Resources.updater);
-                    Process.Start(UPDATER);
-                    Application.Exit();
-                    Process.GetCurrentProcess().Kill();
-                }
-                else
-                {
-                    webClient.Dispose();
-                }
             };
 
             webClient.DownloadFileAsync(uri, path);
@@ -196,48 +127,21 @@ namespace Wnmp.Helpers
         /// </summary>
         public static void CheckForUpdates(bool AutoUpdate)
         {
-            var FoundWnmpUpdate = false; // Since were checking for two updates we have to check if it found the main one.
-
             if (!ReadUpdateXML())
                 return;
 
-            if (WNMP_VER.CompareTo(NEW_WNMP_VERSION) < 0) // If it returns less than 0 than theres a new version
-            {
-                var CV = new ChangelogViewer();
+            if (WNMP_VER.CompareTo(NEW_WNMP_VERSION) < 0) { // If it returns less than 0 than theres a new version
+                var CV = new UpdatePrompt();
                 CV.StartPosition = FormStartPosition.CenterScreen;
                 CV.cversion.Text = WNMP_VER.ToString();
                 CV.newversion.Text = NEW_WNMP_VERSION.ToString();
                 if (CV.ShowDialog() == DialogResult.Yes)
-                {
-                    FoundWnmpUpdate = true;
                     DownloadWnmpUpdate(Wnmp_Upgrade_URL, UpdateExe);
-                }
-            }
-            else
-            {
+            } else {
                 Log.wnmp_log_notice("Your version: " + WNMP_VER + " is up to date.", Log.LogSection.WNMP_MAIN);
             }
-            if (FoundWnmpUpdate != true)
-            {
-                if (Main.GetCPVER.CompareTo(NEW_CP_VERSION) < 0)
-                {
-                    var CV = new ChangelogViewer();
-                    CV.StartPosition = FormStartPosition.CenterScreen;
-                    CV.cversion.Text = Main.GetCPVER.ToString();
-                    CV.newversion.Text = NEW_CP_VERSION.ToString();
 
-                    if (CV.ShowDialog() == DialogResult.Yes)
-                    {
-                        DownloadCPUpdate(CP_UPDATE_URL, WNMP_NEW);
-                    }
-                }
-                else
-                {
-                    Log.wnmp_log_notice("Your control panel version: " + Main.GetCPVER + " is up to date.", Log.LogSection.WNMP_MAIN);
-                }
-            }
-            if (AutoUpdate)
-            {
+            if (AutoUpdate) {
                 Options.settings.Lastcheckforupdate = DateTime.Now;
                 Options.settings.UpdateSettings();
             }
@@ -250,10 +154,8 @@ namespace Wnmp.Helpers
         {
             var wd = Main.StartupPath;
             string[] files = { wd + "/php/php.ini", wd + "/conf/nginx.conf", wd + "/mariadb/my.ini" };
-            foreach (var file in files)
-            {
-                if (File.Exists(file))
-                {
+            foreach (var file in files) {
+                if (File.Exists(file)) {
                     var dest = String.Format("{0}.old", file);
                     File.Copy(file, dest, true);
                     Log.wnmp_log_notice("Backed up " + file + " to " + dest, Log.LogSection.WNMP_MAIN);
@@ -267,19 +169,14 @@ namespace Wnmp.Helpers
         /// and excutes the updater if true.
         /// </summary>
         /// <param name="days"></param>
-        internal static void DoDateEclasped()
+        public static void DoDateEclasped()
         {
-            if (Options.settings.Lastcheckforupdate != DateTime.MinValue)
-            {
+            if (Options.settings.Lastcheckforupdate != DateTime.MinValue) {
                 var LastCheckForUpdate = Options.settings.Lastcheckforupdate;
                 var expiryDate = LastCheckForUpdate.AddDays(Options.settings.Checkforupdatefrequency);
                 if (DateTime.Now > expiryDate)
-                {
                     CheckForUpdates(true);
-                }
-            }
-            else
-            {
+            } else {
                 Options.settings.Lastcheckforupdate = DateTime.Now;
                 Options.settings.UpdateSettings();
             }
@@ -294,15 +191,13 @@ namespace Wnmp.Helpers
             string[] processtokill = { "php-cgi", "nginx", "mysqld" };
             var processes = Process.GetProcesses();
 
-            for (var i = 0; i < processes.Length; i++)
-            {
-                for (var j = 0; j < processtokill.Length; j++)
-                {
+            for (var i = 0; i < processes.Length; i++) {
+                for (var j = 0; j < processtokill.Length; j++) {
                     var tempProcess = processes[i].ProcessName;
 
-                    if (tempProcess == processtokill[j]) // If the proccess is the proccess we want to kill
-                    {
-                        processes[i].Kill(); break; // Kill the proccess
+                    if (tempProcess == processtokill[j]) { // If the proccess is the proccess we want to kill
+                        processes[i].Kill(); // Kill the proccess
+                        break;
                     }
                 }
             }

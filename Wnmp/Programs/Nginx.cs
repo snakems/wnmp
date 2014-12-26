@@ -34,9 +34,7 @@ namespace Wnmp.Programs
         public static Process ps; // Avoid GC
         public static ContextMenuStrip cms = new ContextMenuStrip(); // Config button context menu
         public static ContextMenuStrip lms = new ContextMenuStrip(); // Log button context menu
-        private static readonly ToolTip nginx_start_Tip = new ToolTip(); // Start button ToolTip
-        private static readonly ToolTip nginx_stop_Tip = new ToolTip(); // Stop button ToolTip
-        private static readonly ToolTip nginx_reload_Tip = new ToolTip(); // Reload button ToolTip
+        private static readonly ToolTip toolTip = new ToolTip(); // ToolTip
 
         private static readonly string NginxExe = Main.StartupPath.Replace(@"\", "/") + "/nginx.exe";
 
@@ -45,7 +43,6 @@ namespace Wnmp.Programs
         /// </summary>
         public static void startprocess(string p, string args)
         {
-            System.Threading.Thread.Sleep(100); // Wait
             ps = new Process(); // Create process
             ps.StartInfo.FileName = p; // p is the path and file name of the file to run
             ps.StartInfo.Arguments = args; // Parameters to pass to program
@@ -56,42 +53,42 @@ namespace Wnmp.Programs
             ps.Start(); // Start the process
         }
 
-        internal static void ngx_start_Click(object sender, EventArgs e)
+        public static void ngx_start_Click(object sender, EventArgs e)
         {
                 startprocess(NginxExe, "");
                 Log.wnmp_log_notice("Attempting to start Nginx", Log.LogSection.WNMP_NGINX);
                 Common.ToStartedLabel(Program.formInstance.nginxrunning);
         }
 
-        internal static void ngx_stop_Click(object sender, EventArgs e)
+        public static void ngx_stop_Click(object sender, EventArgs e)
         {
                 startprocess(NginxExe, "-s stop");
                 Log.wnmp_log_notice("Attempting to stop Nginx", Log.LogSection.WNMP_NGINX);
                 Common.ToStoppedLabel(Program.formInstance.nginxrunning);
         }
 
-        internal static void ngx_reload_Click(object sender, EventArgs e)
+        public static void ngx_reload_Click(object sender, EventArgs e)
         {
                 startprocess(NginxExe, "-s reload");
                 Log.wnmp_log_notice("Attempting to reload Nginx", Log.LogSection.WNMP_NGINX);
         }
 
-        internal static void ngx_stop_MouseHover(object sender, EventArgs e)
+        public static void ngx_stop_MouseHover(object sender, EventArgs e)
         {
-            nginx_stop_Tip.Show("Stop Nginx", Program.formInstance.ngx_stop);
+            toolTip.Show("Stop Nginx", Program.formInstance.ngx_stop);
         }
 
-        internal static void ngx_start_MouseHover(object sender, EventArgs e)
+        public static void ngx_start_MouseHover(object sender, EventArgs e)
         {
-            nginx_start_Tip.Show("Start Nginx", Program.formInstance.ngx_start);
+            toolTip.Show("Start Nginx", Program.formInstance.ngx_start);
         }
 
-        internal static void ngx_reload_MouseHover(object sender, EventArgs e)
+        public static void ngx_reload_MouseHover(object sender, EventArgs e)
         {
-            nginx_reload_Tip.Show("Reloads Nginx configuration without restart", Program.formInstance.ngx_reload);
+            toolTip.Show("Reloads Nginx configuration without restart", Program.formInstance.ngx_reload);
         }
 
-        internal static void ngx_cfg_Click(object sender, EventArgs e)
+        public static void ngx_cfg_Click(object sender, EventArgs e)
         {
             var btnSender = (Button)sender;
             var ptLowerLeft = new Point(0, btnSender.Height);
@@ -106,7 +103,7 @@ namespace Wnmp.Programs
             Process.Start(Options.settings.Editor, Main.StartupPath + "/conf/" + e.ClickedItem.Text);
         }
 
-        internal static void ngx_log_Click(object sender, EventArgs e)
+        public static void ngx_log_Click(object sender, EventArgs e)
         {
             var btnSender = (Button)sender;
             var ptLowerLeft = new Point(0, btnSender.Height);

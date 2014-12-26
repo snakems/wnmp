@@ -26,7 +26,6 @@ using Wnmp.Helpers;
 using Wnmp.Internals;
 namespace Wnmp.Forms
 {
-    // TODO: Refractor this class
 
     /// <summary>
     /// Main form of Wnmp
@@ -35,17 +34,10 @@ namespace Wnmp.Forms
     {
         public static string StartupPath { get { return Application.StartupPath; } }
 
-        private static readonly Version CPVER = new Version("2.2.6");
+        private static readonly Version CPVER = new Version("2.3.5");
         public static Version GetCPVER { get { return CPVER; } }
 
         private readonly NotifyIcon WnmpTrayIcon = new NotifyIcon();
-
-        public Main()
-        {
-            InitializeComponent();
-            setevents();
-            Options.settings.ReadSettings();
-        }
 
         protected override CreateParams CreateParams
         {
@@ -56,11 +48,52 @@ namespace Wnmp.Forms
                 return myCp;
             }
         }
-		
+
+        public Main()
+        {
+            InitializeComponent();
+            setevents();
+            Options.settings.ReadSettings();
+        }
+
+        private void Main_Load(object sender, EventArgs e)
+        {
+            Log.setLogComponent(log_rtb);
+            WnmpTrayIcon.Icon = Properties.Resources.logo;
+            WnmpTrayIcon.Visible = true;
+
+            MainHelper.checkforapps();
+            MainHelper.DoTimer();
+
+            PopulateMenus();
+            MainHelper.FirstRun();
+
+            if (Options.settings.Startallapplicationsatlaunch)
+                General.start_Click(null, null);
+
+            if (Options.settings.Autocheckforupdates)
+                Updater.DoDateEclasped();
+
+            Log.wnmp_log_notice("Wnmp ready to go!", Log.LogSection.WNMP_MAIN);
+        }
+
+        /// <summary>
+        /// Populate configuration and log menus
+        /// </summary>
+        private void PopulateMenus()
+        {
+            MainHelper.DirFiles("/conf", "*.conf", Nginx.cms);
+            MainHelper.DirFiles("/mariadb", "my.ini", MariaDB.cms);
+            MainHelper.DirFiles("/php", "php.ini", PHP.cms);
+            MainHelper.DirFiles("/logs", "*.log", Nginx.lms);
+            MainHelper.DirFiles("/mariadb/data", "*.err", MariaDB.lms);
+            MainHelper.DirFiles("/php/logs", "*.log", PHP.lms);
+        }
+        
         /// <summary>
         /// Takes a form and displays it
         /// </summary>
-		private void ShowForm(Form form)
+        private void ShowForm(Form form)
         {
             form.StartPosition = FormStartPosition.CenterParent;
             form.ShowDialog(this);
@@ -85,7 +118,7 @@ namespace Wnmp.Forms
 
         private void SupportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://mailman.getwnmp.org/mailman/listinfo/wnmp");
+            Process.Start("http://mailman.getwnmp.org/mailman/listinfo/wnmp-users");
         }
 
         private void Report_BugToolStripMenuItem_Click(object sender, EventArgs e)
@@ -101,7 +134,7 @@ namespace Wnmp.Forms
 
         private void websiteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start("http://getwnmp.org");
+            Process.Start("https://www.getwnmp.org");
         }
 
         private void donateToolStripMenuItem_Click(object sender, EventArgs e)
@@ -131,40 +164,29 @@ namespace Wnmp.Forms
         {
             if (!Options.settings.Minimizewnmptotray)
                 return;
+            
+            if (WindowState == FormWindowState.Minimized) {
+                this.Hide();
+                if (MinimizeWnmpToTrayCount > 0)
+                    return;
 
-                if (WindowState == FormWindowState.Minimized)
-                {
-                    Hide();
-                    if (MinimizeWnmpToTrayCount > 0)
-                        return;
-
-                    MinimizeWnmpToTrayCount++;
-                    WnmpTrayIcon.BalloonTipTitle = "Wnmp";
-                    WnmpTrayIcon.BalloonTipText = "Wnmp has been minimized to the tray.";
-                    WnmpTrayIcon.ShowBalloonTip(4000);
-                }
-        }
-
-        private void Main_Load(object sender, EventArgs e)
-        {
-            WnmpTrayIcon.Icon = Properties.Resources.logo;
-
-            MainHelper.DoStartup();
-
-            var worker = new System.Threading.Thread(MainHelper.FirstRun);
-            worker.Start();
+                MinimizeWnmpToTrayCount++;
+                WnmpTrayIcon.BalloonTipTitle = "Wnmp";
+                WnmpTrayIcon.BalloonTipText = "Wnmp has been minimized to the tray.";
+                WnmpTrayIcon.ShowBalloonTip(4000);
+           }
         }
 
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Common.DeleteFile(Application.StartupPath + "/updater.exe");
+            WnmpTrayIcon.Dispose();
             Common.DeleteFile(Application.StartupPath + "/Wnmp-Upgrade-Installer.exe");
         }
 
         private void WnmpTrayIcon_Click(object sender, EventArgs e)
         {
-            Show();
-            WindowState = FormWindowState.Normal;
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
         }
 
         private void wnmpdir_Click(object sender, EventArgs e)
@@ -174,7 +196,6 @@ namespace Wnmp.Forms
 
         private void setevents()
         {
-            Log.setLogComponent(log_rtb);
             WnmpTrayIcon.Click += WnmpTrayIcon_Click;
             // General Events Start
             start.Click += General.start_Click;

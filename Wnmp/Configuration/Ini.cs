@@ -37,8 +37,30 @@ namespace Wnmp.Configuration
         public bool Autocheckforupdates = true; // Auto check for updates
         public int Checkforupdatefrequency = 7; // Check for update frequency
         public int PHPPort = 9000; // PHP Port
+        public int PHPProcesses = 2; // Amount of PHP processes
         public DateTime Lastcheckforupdate = DateTime.MinValue;
         public bool Firstrun = true; // First run
+
+        /// <summary>
+        /// Reads an ini value and returns it
+        /// </summary>
+        /// <param name="Option"></param>
+        /// <returns></returns>
+        private string ReadIniValue(string Option, object defobj)
+        {
+            if (!File.Exists(iniPath))
+                return "";
+            
+            string str = Option + "=";
+            using (var sr = new StreamReader(iniPath)) {
+                string line;
+                while ((line = sr.ReadLine()) != null) { // Read every line while not null
+                        if (line.StartsWith(str))
+                            return line.Remove(0, str.Length);
+                }
+            }
+            return defobj.ToString(); // Return the default value as a string
+        }
 
         /// <summary>
         /// Reads the settings from the ini
@@ -46,64 +68,36 @@ namespace Wnmp.Configuration
         public void ReadSettings()
         {
             if (!File.Exists(iniPath))
-            {
                 UpdateSettings(); // Update options with default values
-            }
 
-            if (File.Exists(iniPath))
-            {
-                using (var sr = new StreamReader(iniPath))
-                {
-                    string line;
-                    while ((line = sr.ReadLine()) != null) // Read every line while not null
-                    {
-                        if (line.StartsWith("editorpath="))
-                        {
-                            Editor = line.Remove(0, 11);
-                        }
-                        if (line.StartsWith("startupwithwindows="))
-                        {
-                            Boolean.TryParse(line.Remove(0, 19), out Startupwithwindows);
-                        }
-                        if (line.StartsWith("startallapplicationsatlaunch="))
-                        {
-                            Boolean.TryParse(line.Remove(0, 29), out Startallapplicationsatlaunch);
-                        }
-                        if (line.StartsWith("minimizewnmptotray="))
-                        {
-                            Boolean.TryParse(line.Remove(0, 19), out Minimizewnmptotray);
-                        }
-                        if (line.StartsWith("autocheckforupdates="))
-                        {
-                            Boolean.TryParse(line.Remove(0, 20), out Autocheckforupdates);
-                        }
-                        if (line.StartsWith("checkforupdatefrequency="))
-                        {
-                            int.TryParse(line.Remove(0, 24), out Checkforupdatefrequency);
-                        }
-                        if (line.StartsWith("lastcheckforupdate="))
-                        {
-                            DateTime.TryParse(line.Remove(0, 19), out Lastcheckforupdate);
-                        }
-                        if (line.StartsWith("phpport="))
-                        {
-                            int.TryParse(line.Remove(0, 8), out PHPPort);
-                        }
-                        if (line.StartsWith("firstrun="))
-                        {
-                            Boolean.TryParse(line.Remove(0, 9), out Firstrun);
-                        }
-                    }
-                }
-            }
+            Editor = ReadIniValue("editorpath", Editor);
+            Boolean.TryParse(ReadIniValue("startupwithwindows", Startupwithwindows),
+                             out Startupwithwindows);
+            Boolean.TryParse(ReadIniValue("startallapplicationsatlaunch", Startallapplicationsatlaunch),
+                             out Startallapplicationsatlaunch);
+            Boolean.TryParse(ReadIniValue("minimizewnmptotray", Minimizewnmptotray),
+                             out Minimizewnmptotray);
+            Boolean.TryParse(ReadIniValue("autocheckforupdates", Autocheckforupdates),
+                             out Autocheckforupdates);
+            Boolean.TryParse(ReadIniValue("firstrun", Firstrun),
+                 out Firstrun);
+            int.TryParse(ReadIniValue("checkforupdatefrequency", Checkforupdatefrequency),
+                         out Checkforupdatefrequency);
+            int.TryParse(ReadIniValue("phpprocesses", PHPProcesses),
+                         out PHPProcesses);
+            int.TryParse(ReadIniValue("phpport", PHPPort),
+                         out PHPPort);
+            DateTime.TryParse(ReadIniValue("lastcheckforupdate", Lastcheckforupdate),
+                  out Lastcheckforupdate);
+
+            UpdateSettings();
         }
         /// <summary>
         /// Updates the settings to the ini
         /// </summary>
         public void UpdateSettings()
         {
-            using (var sw = new StreamWriter(iniPath))
-            {
+            using (var sw = new StreamWriter(iniPath)) {
                 sw.WriteLine("; Wnmp Configuration File\r\n;");
                 sw.WriteLine("; Editor path\r\neditorpath=" + Editor);
                 sw.WriteLine("; Start Wnmp with Windows\r\nstartupwithwindows=" + Startupwithwindows);
@@ -112,6 +106,7 @@ namespace Wnmp.Configuration
                 sw.WriteLine("; Automatically check for updates\r\nautocheckforupdates=" + Autocheckforupdates);
                 sw.WriteLine("; Update frequency(In days)\r\ncheckforupdatefrequency=" + Checkforupdatefrequency);
                 sw.WriteLine("; Last check for update\r\nlastcheckforupdate=" + Lastcheckforupdate);
+                sw.WriteLine("; Amount of PHP processes\r\nphpprocesses=" + PHPProcesses);
                 sw.WriteLine("; PHP Port\r\nphpport=" + PHPPort);
                 sw.WriteLine("; First run\r\nfirstrun=" + Firstrun);
             }

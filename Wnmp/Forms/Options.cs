@@ -23,6 +23,7 @@ using Microsoft.Win32;
 
 using Wnmp.Configuration;
 using Wnmp.Internals;
+using System.IO;
 namespace Wnmp.Forms
 {
     /// <summary>
@@ -39,8 +40,7 @@ namespace Wnmp.Forms
 
         protected override CreateParams CreateParams
         {
-            get
-            {
+            get {
                 var myCp = base.CreateParams;
                 myCp.Style = myCp.Style & ~Common.WS_THICKFRAME; // Remove WS_THICKFRAME (Disables resizing)
                 return myCp;
@@ -49,13 +49,14 @@ namespace Wnmp.Forms
 
         private void SetEditor()
         {
-            var input = string.Empty;
+            var input = String.Empty;
             var dialog = new OpenFileDialog();
             dialog.Filter =
-                "excutable files (*.exe)|*.exe|All files (*.*)|*.*";
-            dialog.Title = "Select an editor";
+                "executable files (*.exe)|*.exe|All files (*.*)|*.*";
+            dialog.Title = "Select a text editor";
             if (dialog.ShowDialog() == DialogResult.OK)
                 input = dialog.FileName;
+
             editorTB.Text = dialog.FileName;
             settings.Editor = dialog.FileName;
 
@@ -78,15 +79,12 @@ namespace Wnmp.Forms
         private void StartWnmpWithWindows_CheckedChanged(object sender, EventArgs e)
         {
             // TODO: Should we use the registry or use the users Startup Folder?
-            if (StartWnmpWithWindows.Checked)
-            {
+            if (StartWnmpWithWindows.Checked) {
                 var addReg =
                     Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 addReg.SetValue("Wnmp", "\"" + Application.ExecutablePath + "\"");
                 settings.Startupwithwindows = true;
-            }
-            else
-            {
+            } else {
                 var remove =
                     Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 remove.DeleteValue("Wnmp");
@@ -106,26 +104,27 @@ namespace Wnmp.Forms
 
         private void AutoUpdate_CheckedChanged(object sender, EventArgs e)
         {
-            switch (AutoUpdate.Checked)
-            {
-                case true:
-                    settings.Autocheckforupdates = true;
-                    break;
-                case false:
-                    settings.Autocheckforupdates = false;
-                    break;
-            }
+            if (AutoUpdate.Checked)
+                settings.Autocheckforupdates = true;
+            else
+                settings.Autocheckforupdates = false;
+        }
+
+        private void PHP_PROCESSES_ValueChanged(object sender, EventArgs e)
+        {
+            settings.PHPProcesses = (int)PHP_PROCESSES.Value;
+            UpdatePHPngxCfg();
         }
 
         private void PHP_PORT_ValueChanged(object sender, EventArgs e)
         {
-            settings.PHPPort = Convert.ToInt32(PHP_PORT.Value);
+            settings.PHPPort = (int)PHP_PORT.Value;
         }
 
         private void Save_Click(object sender, EventArgs e)
         {
             settings.UpdateSettings();
-            Close();
+            this.Close();
         }
 
         #region UpdateOptions
@@ -147,14 +146,33 @@ namespace Wnmp.Forms
 
             UpdateCheckInterval.Value = settings.Checkforupdatefrequency;
 
+            PHP_PROCESSES.Value = settings.PHPProcesses;
+
             PHP_PORT.Value = settings.PHPPort;
+        }
+
+        private void UpdatePHPngxCfg()
+        {
+            int i;
+            int pp = Options.settings.PHPProcesses;
+            int port = Options.settings.PHPPort;
+
+            using (var sw = new StreamWriter(Main.StartupPath + "/conf/php_processes.conf")) {
+                sw.WriteLine("# DO NOT MODIFY!!! THIS FILE IS MANAGED BY THE WNMP CONTROL PANEL.\r\n");
+                sw.WriteLine("upstream php_processes {");
+                for (i = 1; i <= pp; i++) {
+                    sw.WriteLine("    server 127.0.0.1:" + port + " weight=1;");
+                    port++;
+                }
+                sw.WriteLine("}");
+            }
         }
 
         #endregion
 
         private void Cancel_Click(object sender, EventArgs e)
         {
-            Close();
+            this.Close();
         }
 
         private void editorTB_DoubleClick(object sender, EventArgs e)
@@ -164,7 +182,7 @@ namespace Wnmp.Forms
 
         private void UpdateCheckInterval_ValueChanged(object sender, EventArgs e)
         {
-            settings.Checkforupdatefrequency = Convert.ToInt32(UpdateCheckInterval.Value);
+            settings.Checkforupdatefrequency = (int)UpdateCheckInterval.Value;
         }
     }
 }
